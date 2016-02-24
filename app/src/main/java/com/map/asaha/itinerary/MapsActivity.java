@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -18,6 +17,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.UrlTileProvider;
 
 
 import java.io.IOException;
@@ -50,27 +50,17 @@ public class MapsActivity extends FragmentActivity {
     }
 
     public void onSearch(View view) throws IOException {
-        EditText place_1 = (EditText) findViewById(R.id.place_1);
-        EditText place_2 = (EditText) findViewById(R.id.place_2);
+        String location_1 = ((EditText) findViewById(R.id.place_1)).getText().toString();
+        String location_2 = ((EditText) findViewById(R.id.place_2)).getText().toString();
 
-        String location_1 = place_1.getText().toString();
-        String location_2 = place_2.getText().toString();
-
-        List<Address> addressList;
         if (!location_1.equals("") && !location_2.equals("")) {
-            Geocoder geocoder = new Geocoder(this);
-            addressList = geocoder.getFromLocationName(location_1, 1);
-            Address address = addressList.get(0);
-            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(latLng).title(place_1.getText().toString()));
+            LatLng latLng1 = MapUtility.getLatLngFromLocationName(location_1);
+            mMap.addMarker(new MarkerOptions().position(latLng1).title(location_1));
+            LatLng latLng2 = MapUtility.getLatLngFromLocationName(location_2);
+            mMap.addMarker(new MarkerOptions().position(latLng2).title(location_2));
 
-            addressList = geocoder.getFromLocationName(location_2, 1);
-            Address address2 = addressList.get(0);
-            LatLng latLng2 = new LatLng(address2.getLatitude(), address2.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(latLng2).title(place_2.getText().toString()));
-
-            mMap.addPolyline(new PolylineOptions().add(latLng, latLng2));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+            MapUtility.drawPath(mMap, latLng1, latLng2);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng1, 10));
         }
     }
 
